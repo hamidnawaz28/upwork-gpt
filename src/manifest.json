@@ -1,0 +1,25 @@
+{
+  "name": "__MSG_appName__",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+  "host_permissions": ["https://*.openai.com"],
+  "permissions": ["scripting"],
+  "background": {
+    "service_worker": "background.bundle.js"
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches":  ["https://www.upwork.com/ab/proposals/job*"],
+      "js": ["content-script.bundle.js"]
+    }
+  ]
+}
