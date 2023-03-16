@@ -64,6 +64,7 @@ const config = {
       patterns: [
         { from: 'src/manifest.json', to: 'code' },
         { from: 'src/_locales', to: 'code/_locales' },
+        { from: 'assets/logo.png', to: 'code' },
       ],
     }),
     // new ZipPlugin({
