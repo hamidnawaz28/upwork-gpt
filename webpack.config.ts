@@ -1,6 +1,7 @@
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
+import ZipPlugin from 'zip-webpack-plugin'
 
 const config = {
   entry: {
@@ -67,21 +68,20 @@ const config = {
         { from: 'assets/logo.png', to: 'code' },
       ],
     }),
-    // new ZipPlugin({
-    //   path: 'build',
-    //   filename: 'firefox.zip',
-    //   extension: 'zip',
-    //   fileOptions: {
-    //     mtime: new Date(),
-    //     mode: 0o100664,
-    //     compress: true,
-    //     forceZip64Format: false,
-    //   },
-    //   zipOptions: {
-    //     forceZip64Format: false,
-    //   },
-    //   exclude: [/\.png$/, /\.html$/],
-    // }),
+    new ZipPlugin({
+      path: '/code',
+      filename: 'chat_gpt.zip',
+      extension: 'zip',
+      fileOptions: {
+        mtime: new Date(),
+        mode: 0o100664,
+        compress: true,
+        forceZip64Format: false,
+      },
+      zipOptions: {
+        forceZip64Format: false,
+      },
+    }),
   ],
   devServer: {
     static: path.join(__dirname, 'dist'),

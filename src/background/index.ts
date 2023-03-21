@@ -23,7 +23,7 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
     })
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
-    myHeaders.append('Authorization', `Bearer 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`)
+    myHeaders.append('Authorization', `Bearer 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`)
 
     const config = {
       method: 'POST',
