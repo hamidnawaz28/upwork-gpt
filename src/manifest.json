@@ -11,7 +11,7 @@
     "128": "logo.png"
   },
   "host_permissions": ["https://*.openai.com"],
-  "permissions": ["scripting"],
+  "permissions": [],
   "background": {
     "service_worker": "background.bundle.js"
   },

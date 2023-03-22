@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "resolveJsonModule": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "ES2015",
     "target": "ES5", 
@@ -8,6 +9,6 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "strict": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
   }
 }

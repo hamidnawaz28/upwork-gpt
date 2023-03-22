@@ -1,14 +1,25 @@
 import Browser from 'webextension-polyfill'
 import { BACKGROUND_SERVICE_WORKER, CONTENT_SCRIPT } from '../common/messaging'
+import { getADoc } from '../firebase'
 
 Browser.runtime.onMessage.addListener(async (request, data) => {
   const { action, jobDetails } = request
   const { tab } = data
   const tabId = tab?.id || 0
   const { skillBadge, jobDescription, jobTags } = jobDetails
+  const response = await getADoc('api', 'openai')
+  if (!response.success) {
+    await Browser.tabs.sendMessage(tabId, {
+      action: BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE,
+      data: { gptResponse: 'Unable to get the config' },
+      tabId,
+    })
+    return
+  }
+  const { secretKey, model } = response.data
   if (action === CONTENT_SCRIPT.GENERATE_BID) {
     const payload = JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: model,
       messages: [
         {
           role: 'user',
@@ -23,7 +34,7 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
     })
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
-    myHeaders.append('Authorization', `Bearer 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`)
+    myHeaders.append('Authorization', `Bearer ${secretKey}`)
 
     const config = {
       method: 'POST',
@@ -32,14 +43,24 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
     }
     let response: any = await fetch('https://api.openai.com/v1/chat/completions', config)
     response = await response.json()
-    const data = {
-      gptResponse: `${response?.choices?.[0]?.message?.content}` || '',
-    }
+    if (response.error) {
+      await Browser.tabs.sendMessage(tabId, {
+        action: BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE,
+        data: { gptResponse: `openai error: ${response.error.code}` },
+        tabId,
+      })
+      return
+    } else {
+      const data = {
+        gptResponse: `${response?.choices?.[0]?.message?.content}` || '',
+      }
 
-    await Browser.tabs.sendMessage(tabId, {
-      action: BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE,
-      data,
-      tabId,
-    })
+      await Browser.tabs.sendMessage(tabId, {
+        action: BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE,
+        data,
+        tabId,
+      })
+      return
+    }
   }
 })

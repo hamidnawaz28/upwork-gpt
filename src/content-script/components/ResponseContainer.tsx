@@ -125,7 +125,7 @@ function ResponseContainer() {
                 }}
               >
                 <Typography color="text.secondary" variant="body1" gutterBottom>
-                  ChatGPT Response
+                  GPT Response
                 </Typography>
 
                 <ContentCopyIcon

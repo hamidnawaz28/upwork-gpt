@@ -1,4 +1,4 @@
-import { render } from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import Browser from 'webextension-polyfill'
 import '../../base.css'
 import { CONTENT_SCRIPT } from '../common/messaging'
@@ -35,8 +35,8 @@ const renderBidButton = () => {
         action: CONTENT_SCRIPT.GENERATE_BID,
         jobDetails: details,
       })
-
-      render(<ResponseContainer />, responseContainer)
+      const root = createRoot(responseContainer)
+      root.render(<ResponseContainer />)
     }
   }, 1000)
 }

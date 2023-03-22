@@ -70,7 +70,7 @@ const config = {
     }),
     new ZipPlugin({
       path: '/code',
-      filename: 'chat_gpt.zip',
+      filename: 'upwork_gpt.zip',
       extension: 'zip',
       fileOptions: {
         mtime: new Date(),
