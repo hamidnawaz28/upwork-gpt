@@ -1,16 +1,19 @@
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardActions from '@mui/material/CardActions'
-import CardContent from '@mui/material/CardContent'
-import Collapse from '@mui/material/Collapse'
-import IconButton from '@mui/material/IconButton'
-import LinearProgress from '@mui/material/LinearProgress'
+import { ContentCopy as ContentCopyIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material'
+import {
+  Box,
+  Card,
+  CardActions,
+  CardContent,
+  Collapse,
+  IconButton,
+  LinearProgress,
+  Typography,
+} from '@mui/material'
 import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
 import { useEffect, useId, useState } from 'react'
+
 import Browser from 'webextension-polyfill'
+
 import { BACKGROUND_SERVICE_WORKER } from '../../common/messaging'
 import { GptIcon } from './Icons'
 
@@ -125,7 +128,7 @@ function ResponseContainer() {
                 }}
               >
                 <Typography color="text.secondary" variant="body1" gutterBottom>
-                  GPT Response
+                  Recommended Cover Letter
                 </Typography>
 
                 <ContentCopyIcon
@@ -138,9 +141,9 @@ function ResponseContainer() {
                 />
               </Box>
 
-              {data.map((el) => {
+              {data.map((el, key) => {
                 return (
-                  <Typography paragraph key={id}>
+                  <Typography paragraph key={`${id}${key}`}>
                     {el}
                   </Typography>
                 )

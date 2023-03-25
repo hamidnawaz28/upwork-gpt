@@ -8,6 +8,8 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
   const tabId = tab?.id || 0
   const { skillBadge, jobDescription, jobTags } = jobDetails
   const response = await getADoc('api', 'openai')
+
+  // When unable to get the access key, throw an error on frontend
   if (!response.success) {
     await Browser.tabs.sendMessage(tabId, {
       action: BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE,
@@ -25,7 +27,7 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
           role: 'user',
           content: `
       generate bid for the project where,
-      specialization areas : ${skillBadge}, 
+      specialization area is : ${skillBadge}, 
       skills required : ${jobTags.join(' ')} and
       job description: ${jobDescription}
       `,
@@ -43,6 +45,8 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
     }
     let response: any = await fetch('https://api.openai.com/v1/chat/completions', config)
     response = await response.json()
+
+    // Where is error from openai throw it to the front
     if (response.error) {
       await Browser.tabs.sendMessage(tabId, {
         action: BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE,

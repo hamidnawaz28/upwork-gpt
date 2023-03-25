@@ -55,7 +55,7 @@ const config = {
   },
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'code/[name].bundle.js',
+    filename: 'upwork_gpt/[name].bundle.js',
   },
   plugins: [
     new MiniCssExtractPlugin({
@@ -63,9 +63,9 @@ const config = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'src/manifest.json', to: 'code' },
-        { from: 'src/_locales', to: 'code/_locales' },
-        { from: 'assets/logo.png', to: 'code' },
+        { from: 'src/manifest.json', to: 'upwork_gpt' },
+        { from: 'src/_locales', to: 'upwork_gpt/_locales' },
+        { from: 'assets/logo.png', to: 'upwork_gpt' },
       ],
     }),
     new ZipPlugin({
