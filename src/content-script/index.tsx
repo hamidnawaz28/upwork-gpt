@@ -21,14 +21,26 @@ const renderBidButton = () => {
       }
       const description = document?.querySelector('.description') as HTMLElement
       const skillBadge = document?.querySelector('.up-skill-badge') as HTMLElement
+
+      const jobTitle = ''
+      const jobTags = Array.from(document?.querySelectorAll('[data-test="skill"]')).map(
+        (el: any) => el.innerText,
+      )
+      const freelancerRef = Array.from(document.querySelectorAll('[data-cy="menu-item-trigger"]'))
+      let freelancer = ''
+      if (freelancerRef.length) {
+        freelancer =
+          freelancerRef.find((el: any) => el.innerText.includes(`Profile`))?.getAttribute('href') ||
+          ''
+      }
+
       const details = {
-        freelancerName: '',
-        jobTitle: '',
+        jobUrl: window.location.pathname,
+        freelancer: freelancer,
+        jobTitle: jobTitle,
         jobDescription: description?.innerText || '',
         skillBadge: skillBadge?.innerText || '',
-        jobTags: [],
-        experienceLevel: '',
-        projectDuration: '',
+        jobTags: jobTags || [],
       }
 
       Browser.runtime.sendMessage({

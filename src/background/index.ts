@@ -19,6 +19,7 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
     return
   }
   const { secretKey, model } = response.data
+  const allJobTags = jobTags.join(' ')
   if (action === CONTENT_SCRIPT.GENERATE_BID) {
     const payload = JSON.stringify({
       model: model,
@@ -28,7 +29,7 @@ Browser.runtime.onMessage.addListener(async (request, data) => {
           content: `
       generate bid for the project where,
       specialization area is : ${skillBadge}, 
-      skills required : ${jobTags.join(' ')} and
+      skills required : ${allJobTags} and
       job description: ${jobDescription}
       `,
         },
