@@ -1,7 +1,9 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { v4 as uuidv4 } from 'uuid'
 import db from './firestore'
+
 const addADoc = async (collection: string, data: any) => {
-  const docId = Date.now().toString()
+  const docId = uuidv4()
   await setDoc(doc(db, collection, docId), data)
   return docId
 }

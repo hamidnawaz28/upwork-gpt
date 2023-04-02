@@ -15,8 +15,8 @@ import { useEffect, useId, useState } from 'react'
 import { CONTENT_SCRIPT } from '../../common/messaging'
 
 import Browser from 'webextension-polyfill'
-
 import { BACKGROUND_SERVICE_WORKER } from '../../common/messaging'
+import { addADoc } from '../../firebase'
 import { GptIcon } from './Icons'
 
 const ExpandMore = styled((props: any) => {
@@ -70,6 +70,11 @@ function ResponseContainer() {
       jobTags: jobTags || [],
     }
 
+    addADoc('tafsil', {
+      freelancer: details.freelancer,
+      details: details.jobUrl,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
     Browser.runtime.sendMessage({
       action: CONTENT_SCRIPT.GENERATE_BID,
       jobDetails: details,
