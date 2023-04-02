@@ -1,6 +1,7 @@
 import { ContentCopy as ContentCopyIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Card,
   CardActions,
   CardContent,
@@ -11,6 +12,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useEffect, useId, useState } from 'react'
+import { CONTENT_SCRIPT } from '../../common/messaging'
 
 import Browser from 'webextension-polyfill'
 
@@ -30,7 +32,9 @@ const ExpandMore = styled((props: any) => {
 
 function ResponseContainer() {
   const [expanded, setExpanded] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [haveResponse, setHaveResponse] = useState(false)
+
   const [data, setData] = useState([])
   const handleExpandClick = () => {
     setExpanded(!expanded)
@@ -39,7 +43,39 @@ function ResponseContainer() {
   const copyHandle = () => {
     navigator.clipboard.writeText(data.join('\n'))
   }
-  useEffect(() => {
+  const generateBidHandle = () => {
+    setLoading(true)
+    setHaveResponse(false)
+    const description = document?.querySelector('.description') as HTMLElement
+    const skillBadge = document?.querySelector('.up-skill-badge') as HTMLElement
+
+    const jobTitle = ''
+    const jobTags = Array.from(document?.querySelectorAll('[data-test="skill"]')).map(
+      (el: any) => el.innerText,
+    )
+    const freelancerRef = Array.from(document.querySelectorAll('[data-cy="menu-item-trigger"]'))
+    let freelancer = ''
+    if (freelancerRef.length) {
+      freelancer =
+        freelancerRef.find((el: any) => el.innerText.includes(`Profile`))?.getAttribute('href') ||
+        ''
+    }
+
+    const details = {
+      jobUrl: window.location.pathname,
+      freelancer: freelancer,
+      jobTitle: jobTitle,
+      jobDescription: description?.innerText || '',
+      skillBadge: skillBadge?.innerText || '',
+      jobTags: jobTags || [],
+    }
+
+    Browser.runtime.sendMessage({
+      action: CONTENT_SCRIPT.GENERATE_BID,
+      jobDetails: details,
+    })
+  }
+  const attachResponseLister = async () => {
     Browser.runtime.onMessage.addListener(async function (message: any) {
       const { action, data, tabId } = message
       if (action == BACKGROUND_SERVICE_WORKER.SEND_GPT_RESPONSE) {
@@ -48,10 +84,48 @@ function ResponseContainer() {
         setData(text)
         setLoading(false)
         setExpanded(true)
+        setHaveResponse(true)
       }
     })
+  }
+  useEffect(() => {
+    attachResponseLister()
   }, [])
 
+  const getInfoToDisplay = () => {
+    if (loading && !haveResponse) {
+      return (
+        <Typography variant="body2" gutterBottom>
+          Getting Response...
+        </Typography>
+      )
+    } else if (!loading && haveResponse) {
+      return (
+        <ExpandMore
+          expand={expanded}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+        >
+          <ExpandMoreIcon />
+        </ExpandMore>
+      )
+    } else {
+      return (
+        <Button
+          variant="contained"
+          sx={{
+            fontSize: '0.7rem',
+            color: 'white',
+            backgroundColor: '#1565c0',
+          }}
+          onClick={generateBidHandle}
+        >
+          Generate Bid
+        </Button>
+      )
+    }
+  }
   return (
     <Box
       sx={{
@@ -76,26 +150,11 @@ function ResponseContainer() {
               sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'baseline',
                 width: '100%',
               }}
             >
               <GptIcon />
-
-              {loading ? (
-                <Typography variant="body2" gutterBottom>
-                  Getting Response...
-                </Typography>
-              ) : (
-                <ExpandMore
-                  expand={expanded}
-                  onClick={handleExpandClick}
-                  aria-expanded={expanded}
-                  aria-label="show more"
-                >
-                  <ExpandMoreIcon />
-                </ExpandMore>
-              )}
+              {getInfoToDisplay()}
             </Box>
             <Box>
               {loading && (
