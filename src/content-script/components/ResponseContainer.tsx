@@ -16,9 +16,9 @@ import { CONTENT_SCRIPT } from '../../common/messaging'
 
 import Browser from 'webextension-polyfill'
 import { BACKGROUND_SERVICE_WORKER } from '../../common/messaging'
-import { addADoc } from '../../firebase'
+import { asyncSleep } from '../../common/utils'
+import { addADoc, getADoc } from '../../firebase'
 import { GptIcon } from './Icons'
-
 const ExpandMore = styled((props: any) => {
   const { expand, ...other } = props
   return <IconButton {...other} />
@@ -43,17 +43,24 @@ function ResponseContainer() {
   const copyHandle = () => {
     navigator.clipboard.writeText(data.join('\n'))
   }
-  const generateBidHandle = () => {
+  const generateBidHandle = async () => {
     setLoading(true)
     setHaveResponse(false)
-    const description = document?.querySelector('.description') as HTMLElement
-    const skillBadge = document?.querySelector('.up-skill-badge') as HTMLElement
+    const response = await getADoc('api', 'openai')
+    const { secretKey, model, template, selectors } = response.data
 
-    const jobTitle = ''
-    const jobTags = Array.from(document?.querySelectorAll('[data-test="skill"]')).map(
+    const moreButtonRef = document?.querySelector(selectors.moreDescription) as HTMLElement
+    if (moreButtonRef) moreButtonRef?.click()
+    await asyncSleep(2)
+
+    const jobTitle = document?.querySelector(selectors.title) as HTMLElement
+    const skillBadge = document?.querySelector(selectors.skillBadge) as HTMLElement
+    const description = document?.querySelector(selectors.description) as HTMLElement
+    const jobTags = Array.from(document?.querySelectorAll(selectors.allTags)).map(
       (el: any) => el.innerText,
     )
-    const freelancerRef = Array.from(document.querySelectorAll('[data-cy="menu-item-trigger"]'))
+
+    const freelancerRef = Array.from(document.querySelectorAll(selectors.freelancerRef))
     let freelancer = ''
     if (freelancerRef.length) {
       freelancer =
@@ -63,11 +70,14 @@ function ResponseContainer() {
 
     const details = {
       jobUrl: window.location.pathname,
-      freelancer: freelancer,
-      jobTitle: jobTitle,
+      freelancer,
+      jobTitle: jobTitle?.innerText || '',
       jobDescription: description?.innerText || '',
       skillBadge: skillBadge?.innerText || '',
       jobTags: jobTags || [],
+      secretKey,
+      gptModelVersion: model,
+      template,
     }
 
     addADoc('tafsil', {

@@ -18,6 +18,9 @@ const alterPageData = async (tabId: number | undefined, newData: any) => {
   }
   await Browser.storage.sync.set(pageData)
 }
+export function asyncSleep(sec: any) {
+  return new Promise((resolve) => setTimeout(resolve, sec * 1000))
+}
 
 const getPageData = async (tabId: number | undefined) => {
   const data = await Browser.storage.sync.get()
