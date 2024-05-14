@@ -42,7 +42,7 @@ const upworkData = {
     type: 'multi-select',
     data: ['0-4', '8', '12', '16'],
   },
-  freelancerExperience: {
+  expereienceLevelRequired: {
     name: 'contractor_tier',
     type: 'multi-select',
     data: ['1', '2', '3'],
@@ -62,8 +62,8 @@ const upworkData = {
     name: 'hourly_rate',
     type: 'fields',
     data: {
-      from: 1,
-      to: 1000,
+      min: 1,
+      max: 1000,
     },
   },
 
@@ -83,7 +83,8 @@ const upworkData = {
     type: 'multi-select',
     data: ['0-4', '5-9', '10-14', '15-19', '20-49'],
   },
-  query: {
+  keywords: {
+    // verify we can use multiple
     name: 'q',
     type: 'text-field',
     data: 'chrome+extension',

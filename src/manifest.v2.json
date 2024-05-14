@@ -18,6 +18,18 @@
       "background.js"
     ]
   },
+  "oauth2": {
+    "client_id": "185322597233-mmed2riuck8e79tj8fii4oee7sbovqe5.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/contacts.readonly",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/drive.metadata.readonly",
+      "https://www.googleapis.com/auth/drive.appdata",
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/spreadsheets.readonly"
+    ]
+  },
   "content_scripts": [
     {
       "matches": [

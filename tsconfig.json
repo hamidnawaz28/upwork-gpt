@@ -1,9 +1,16 @@
 {
   "compilerOptions": {
+    "types": [
+      "chrome"
+    ],
     "resolveJsonModule": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "ES2015",
-    "target": "ES5", 
+    "target": "ES5",
     "allowJs": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
