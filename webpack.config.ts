@@ -4,9 +4,12 @@ import path from 'path'
 import ZipPlugin from 'zip-webpack-plugin'
 
 const config = {
+
   entry: {
     background: '/src/background/index.ts',
-    'content-script': '/src/content-script/index.tsx',
+    'proposals-script': '/src/content-script/proposals/Proposals.tsx',
+    'job-search-script': '/src/content-script/jobSearch/JobsSearch.tsx',
+    popup: '/src/popup/index.tsx',
   },
 
   module: {
@@ -66,6 +69,7 @@ const config = {
         { from: 'src/manifest.json', to: 'upwork_gpt' },
         { from: 'src/_locales', to: 'upwork_gpt/_locales' },
         { from: 'assets/logo.png', to: 'upwork_gpt' },
+        { from: 'src/popup/popup.html', to: 'upwork_gpt' },
       ],
     }),
     new ZipPlugin({
@@ -89,5 +93,6 @@ const config = {
     port: 4000,
   },
   devtool: 'cheap-module-source-map',
+
 }
 export default config

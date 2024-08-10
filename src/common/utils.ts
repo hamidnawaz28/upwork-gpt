@@ -1,54 +1,53 @@
-import Browser from 'webextension-polyfill'
+import Browser from "webextension-polyfill"
+import { BACKGROUND_SERVICE_WORKER, CONTENT_SCRIPT } from "./messaging"
 
-const alterPageData = async (tabId: number | undefined, newData: any) => {
-  const chromeStorage = await Browser.storage.sync.get()
-  let autoRefreshData = chromeStorage?.autoRefreshData || []
-  autoRefreshData = autoRefreshData.map((data: any) => {
-    if (data.tabId == tabId) {
-      return {
-        ...data,
-        ...newData,
-      }
-    }
-    return data
-  })
-
-  const pageData = {
-    autoRefreshData,
-  }
-  await Browser.storage.sync.set(pageData)
-}
-export function asyncSleep(sec: any) {
+function asyncSleep(sec: any) {
   return new Promise((resolve) => setTimeout(resolve, sec * 1000))
 }
 
-const getPageData = async (tabId: number | undefined) => {
-  const data = await Browser.storage.sync.get()
-  const autoRefreshData = data?.autoRefreshData || []
-  return autoRefreshData.find((data: any) => data.tabId == tabId)
+const clickButton = (selector: string) => {
+  const buttonRef = document?.querySelector(selector) as HTMLElement
+  if (buttonRef) buttonRef?.click()
 }
 
-const updateTabsStorage = async (tabId: number | undefined, add = true) => {
-  const refreshData = {
-    tabId: tabId,
-    running: false,
-    intervalValue: 10,
-    intervalObject: null,
-    timeRef: null,
+const prepareUserData = async () => {
+  const selectors = await Browser.runtime.sendMessage({
+    action: CONTENT_SCRIPT.GET_SELECTORS,
+  })
+
+  clickButton(selectors.moreDescription)
+
+  await asyncSleep(2)
+
+  const jobTitle = document?.querySelector(selectors.title) as HTMLElement
+  const skillBadge = document?.querySelector(selectors.skillBadge) as HTMLElement
+  const description = document?.querySelector(selectors.description) as HTMLElement
+  const jobTags = Array.from(document?.querySelectorAll(selectors.allTags))?.map(
+    (el: any) => el?.innerText
+  )
+
+  const freelancerRef = Array.from(document.querySelectorAll(selectors.freelancerRef))
+  let freelancer = freelancerRef?.find((el: any) => el?.innerText.includes(`Profile`))?.getAttribute('href') ?? ""
+
+  return {
+    jobUrl: window.location.pathname,
+    freelancer,
+    jobTitle: jobTitle?.innerText || '',
+    jobDescription: description?.innerText || '',
+    skillBadge: skillBadge?.innerText || '',
+    jobTags: jobTags || [],
+    country: ""
   }
-  const prevData = await Browser.storage.sync.get()
-  const prevPagesData = prevData?.autoRefreshData || []
-  let pageData: any = {}
-  if (add) {
-    pageData = {
-      autoRefreshData: [...prevPagesData, { ...refreshData }],
-    }
-  } else {
-    const filteredData = prevPagesData.filter((data: any) => data.tabId != tabId)
-    pageData = {
-      autoRefreshData: [...filteredData],
-    }
-  }
-  await Browser.storage.sync.set(pageData)
 }
-export { alterPageData, getPageData, updateTabsStorage }
+
+const subscribeOpenAiResponseListner = async (callBack: any) => Browser.runtime.onMessage.addListener(async function (message: any) {
+  const { action, data } = message
+  if (action == BACKGROUND_SERVICE_WORKER.GET_OPENAI_RESPONSE) callBack(data)
+})
+
+export {
+  subscribeOpenAiResponseListner,
+  asyncSleep,
+  clickButton,
+  prepareUserData
+}
