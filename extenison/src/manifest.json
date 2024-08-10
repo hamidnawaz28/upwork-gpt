@@ -21,7 +21,7 @@
   "action": {
     "default_icon": "logo.png",
     "default_popup": "popup.html",
-    "default_title": "Upwork Gpt"
+    "default_title": "Freelance GPT Copilot"
   },
   "content_scripts": [
     {

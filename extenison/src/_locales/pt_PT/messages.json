@@ -1,7 +1,8 @@
 {
   "appName": {
-    "message": "Upwork GPT"
+    "message": "Freelance GPT Copilot"
   },
   "appDesc": {
-    "message": "Upwork GPT gera propostas de candidatura personalizadas e convincentes usando tecnologia GPT, economizando tempo e aumentando as chances de ganhar candidaturas." }
+    "message": "Freelance GPT Copilot gera propostas de candidatura personalizadas e convincentes usando tecnologia GPT, economizando tempo e aumentando as chances de ganhar candidaturas."
+  }
 }
