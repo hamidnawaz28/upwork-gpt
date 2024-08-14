@@ -4,25 +4,25 @@ import { Request } from "firebase-functions/v1";
 import { REQUEST_STATUS } from "./common/constant";
 
 interface JobDetails {
-    skillBadge: string,
-    jobDescription: string,
-    jobTags: string[],
-    freelancer: string,
+    skillBadge: string
+    jobDescription: string
+    jobTags: string[]
+    freelancer: string
     jobUrl: string
     country: string
 }
 
 interface GptTemplate {
-    basic: string,
+    basic: string
     allJobTags: string
     skillBadge: string
 }
 
 interface UpworkGptConfig {
-    model: string,
-    secretKey: string,
+    model: string
+    secretKey: string
     template: GptTemplate
-    selectors: Record<string, string>,
+    selectors: Record<string, string>
 }
 
 const addJobLogs = (jobDetails: JobDetails) => addADoc('tafsil', {

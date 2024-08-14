@@ -21,7 +21,7 @@
   "action": {
     "default_icon": "logo.png",
     "default_popup": "popup.html",
-    "default_title": "Freelance GPT Copilot"
+    "default_title": "Copalat - A GPT for freelance"
   },
   "content_scripts": [
     {
