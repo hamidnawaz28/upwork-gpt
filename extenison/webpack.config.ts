@@ -8,7 +8,7 @@ const config = {
   entry: {
     background: '/src/background/index.ts',
     'proposals-script': '/src/content-script/proposals/Proposals.tsx',
-    'job-search-script': '/src/content-script/jobSearch/JobsSearch.tsx',
+    // 'job-search-script': '/src/content-script/jobSearch/JobsSearch.tsx',
     popup: '/src/popup/index.tsx',
   },
 
