@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Copalat store graphics</title>
+  <!-- Source for the Chrome Web Store images. render.mjs opens this page once per scene
+       (?scene=...) in headless Chrome and saves a picture. The widget and popup shown are
+       the real extension code, fed with sample data. -->
+  <link rel="stylesheet" href="../../extenison/lib/ui.css" />
+  <link rel="stylesheet" href="../../extenison/popup/popup.css" />
+  <link rel="stylesheet" href="scene.css" />
+</head>
+<body>
+  <div class="frame" id="frame"></div>
+
+  <script>
+    const scene = new URLSearchParams(location.search).get('scene') || 'hero'
+
+    // ---------- sample data ----------
+    const config = {
+      freeTrial: 5,
+      plans: [
+        { id: 'starter', name: 'Starter', price: '$9', proposals: 30 },
+        { id: 'pro', name: 'Pro', price: '$15', proposals: 60 },
+        { id: 'unlimited', name: 'Unlimited', price: '$99' },
+      ],
+      tones: [
+        { id: 'professional', label: 'Professional' },
+        { id: 'friendly', label: 'Friendly' },
+        { id: 'confident', label: 'Confident' },
+        { id: 'concise', label: 'Concise' },
+      ],
+      lengths: [
+        { id: 'short', label: 'Short' },
+        { id: 'medium', label: 'Medium' },
+        { id: 'detailed', label: 'Detailed' },
+      ],
+    }
+    const account = {
+      plan: 'free', active: false, used: 2, limit: 5, remaining: 3, has_customer: false,
+      settings: { about: '', tone: 'professional', length: 'medium' },
+    }
+    const profiles = [
+      { id: 'p1', name: 'Shopify developer', about: '6 years building Shopify stores. Shipped 40+ stores and cut load time by half on three of them.', is_default: true },
+      { id: 'p2', name: 'Excel and data', about: 'Cleaning and modelling large Excel datasets. Built 30+ dashboards for finance and operations teams.', is_default: false },
+    ]
+    const user = { id: '1', email: 'alex@example.com', name: 'Alex Morgan', avatar: '' }
+    const letter =
+      'Losing mobile buyers before the gallery loads is usually a theme problem rather than a hosting one, so it can be fixed without a redesign.\n\n' +
+      'I have shipped 40+ Shopify stores and cut load time by half on three of them, most recently a fashion store with a very similar product page.\n\n' +
+      'I would start by profiling the product template to find which scripts block the first paint, then defer or remove them and rebuild the gallery in clean Liquid.\n\n' +
+      'Which theme is the store running at the moment?'
+    const answers = [
+      { question: 'Describe your recent experience with similar projects', answer: 'Last month I rebuilt the product page of a fashion store on Dawn. Removing three render-blocking apps and lazy-loading the gallery took mobile load time from 5.8s to 2.6s.' },
+      { question: 'How soon can you start?', answer: 'I can start this week. A speed audit takes me two days, and I would share the findings before changing anything.' },
+    ]
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+    window.chrome = {
+      runtime: {
+        getURL: (path) => `../../extenison/${path}`,
+        sendMessage: async ({ action }) => {
+          if (action === 'GET_STATE') return { ok: true, data: { user, account, selectors: { description: '.job-text' }, profiles, config } }
+          if (action === 'GET_HISTORY') return { ok: true, data: { proposals: [
+            { id: 'a', job_title: 'Shopify developer to speed up our product pages', content: letter, created_at: '2026-10-06T10:00:00Z' },
+            { id: 'b', job_title: 'Excel data cleanup and weekly spending dashboard', content: 'Weekly totals can differ depending on which date field is used, so that is the first thing I would settle.', created_at: '2026-10-05T10:00:00Z' },
+          ] } }
+          if (action === 'GENERATE') return { ok: true, data: { coverLetter: letter, answers: scene === 'answers' ? answers : [], account: { ...account, used: 3, remaining: 2 } } }
+          return { ok: true, data: { account, profiles } }
+        },
+      },
+    }
+
+    // ---------- building blocks ----------
+    const frame = document.getElementById('frame')
+    const logo = '<img src="../../extenison/logo.png" alt="" />'
+
+    const pitch = (kicker, headline, sub, points = []) => `
+      <section class="pitch">
+        <div class="brand">${logo}<span>Copalat</span></div>
+        <p class="kicker">${kicker}</p>
+        <h1>${headline}</h1>
+        <p class="sub">${sub}</p>
+        <ul>${points.map((point) => `<li>${point}</li>`).join('')}</ul>
+      </section>`
+
+    // A neutral stand-in for a freelance marketplace's proposal form.
+    const jobPage = `
+      <section class="stage">
+        <div class="page">
+          <p class="page-kicker">Submit a proposal</p>
+          <h2>Shopify developer to speed up our product pages</h2>
+          <p class="page-meta">Fixed price · Intermediate · Posted 2 hours ago</p>
+          <p class="job-text">Our store's product pages load slowly on mobile and we are losing buyers before the gallery appears. We need someone who knows Liquid and Core Web Vitals to audit the theme and rebuild the product template.</p>
+          <div class="tags"><span>Shopify</span><span>Liquid</span><span>Page speed</span><span>Core Web Vitals</span></div>
+          <label for="cover">Cover Letter</label>
+          <textarea id="cover"></textarea>
+          <label for="q1">Describe your recent experience with similar projects</label>
+          <textarea id="q1" class="small"></textarea>
+        </div>
+      </section>`
+
+    const loadScript = (src) =>
+      new Promise((resolve) => {
+        const script = document.createElement('script')
+        script.src = src
+        script.onload = resolve
+        document.body.append(script)
+      })
+
+    // Mounts the real page widget inside the picture and returns its shadow root.
+    async function mountWidget() {
+      await loadScript('../../extenison/lib/ui.js')
+      await loadScript('../../extenison/content/proposals.js')
+      const host = document.getElementById('copalat-root')
+      frame.querySelector('.stage').append(host)
+      host.style.cssText = 'position:absolute;right:28px;bottom:28px;z-index:5'
+      await sleep(600)
+      return host.shadowRoot
+    }
+
+    const click = (root, label) =>
+      [...root.querySelectorAll('button')].find((button) => button.textContent.trim() === label)?.click()
+
+    // Extra rules for the widget inside a picture: no animations or transitions, so nothing
+    // is caught half way, plus whatever the scene needs.
+    const restyle = (root, css) => {
+      const style = document.createElement('style')
+      style.textContent = `*{transition:none!important;animation:none!important}${css}`
+      root.append(style)
+    }
+
+    // ---------- scenes ----------
+    const scenes = {
+      async hero() {
+        frame.innerHTML =
+          pitch('AI Upwork proposal writer', 'Write Upwork proposals that get opened.', 'Copalat reads the job post and drafts a cover letter written for that client, in seconds.', ['Tailored to each job post', 'Inserted into the form in one click', '5 proposals free, no card']) + jobPage
+        const root = await mountWidget()
+        restyle(root, '.widget-body{max-height:none}.widget-body>.field,.hint{display:none}')
+        click(root, 'Generate proposal')
+        await sleep(900)
+        click(root, 'Insert')
+        await sleep(200)
+        // Show the start of the inserted letter, not the end.
+        document.getElementById('cover').scrollTop = 0
+        document.getElementById('cover').blur()
+      },
+      async controls() {
+        frame.innerHTML =
+          pitch('Your voice, your call', 'Pick the profile, tone and length. Then generate.', 'Four tones and three lengths, with your defaults remembered. Add a note for anything you want mentioned.', ['Professional, friendly, confident or concise', 'Short, medium or detailed', 'Regenerate until it sounds like you']) + jobPage
+        const root = await mountWidget()
+        restyle(root, '.widget-body{max-height:none}')
+        click(root, 'Confident')
+        const input = root.querySelector('input')
+        input.value = 'Mention the fashion store I rebuilt last month'
+      },
+      async answers() {
+        frame.innerHTML =
+          pitch('Screening questions', 'The client\'s extra questions, answered too.', 'Copalat finds the screening questions on the page and drafts an answer for each, next to your cover letter.', ['One answer per question', 'Insert each one where it belongs', 'Nothing is sent until you submit']) + jobPage
+        const root = await mountWidget()
+        restyle(root, '.widget-body{max-height:none}.widget-body>.field,.widget-body>.btn,.hint{display:none}.result:first-of-type .proposal-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}')
+        click(root, 'Generate proposal')
+        await sleep(900)
+      },
+      async profiles() {
+        frame.innerHTML =
+          pitch('Only what is true', 'Proposals built on your real experience.', 'Save a profile for each kind of work you do and set a default. Copalat only claims what you wrote, never invented clients or numbers.', ['Several named profiles', 'Pick one per proposal, or none', 'Your recent proposals, one click away']) +
+          '<section class="stage stage-popup"><div class="popup-shell"><div class="copalat popup"><main id="root" class="stack"></main></div></div></section>'
+        await loadScript('../../extenison/lib/ui.js')
+        await loadScript('../../extenison/popup/popup.js')
+        await sleep(700)
+        // The plan cards are shown in their own picture; here the profiles are the point.
+        document.querySelector('#root .usage')?.nextElementSibling?.remove()
+        // The popup looks for its logo one folder up from popup.html; here it lives elsewhere.
+        document.querySelector('#root .logo').src = '../../extenison/logo.png'
+        await sleep(300)
+      },
+      async pricing() {
+        const plan = (name, price, period, quota, points, featured) => `
+          <article class="price-card${featured ? ' featured' : ''}">
+            ${featured ? '<span class="price-tag">Best to start</span>' : ''}
+            <h3>${name}</h3>
+            <p class="price">${price}<span>${period}</span></p>
+            <p class="quota">${quota}</p>
+            <ul>${points.map((point) => `<li>${point}</li>`).join('')}</ul>
+          </article>`
+        frame.classList.add('frame-wide')
+        frame.innerHTML = `
+          <section class="pricing">
+            <div class="brand">${logo}<span>Copalat</span></div>
+            <h1>Start free. Pay when it is winning you work.</h1>
+            <p class="sub">Every feature is included on every plan. Cancel any time.</p>
+            <div class="price-grid">
+              ${plan('Free trial', '$0', '', '5 proposals, once', ['No card needed', 'Sign in with Google'])}
+              ${plan('Starter', '$9', '/month', '30 proposals a month', ['30 cents a proposal', 'Screening answers included'], true)}
+              ${plan('Pro', '$15', '/month', '60 proposals a month', ['25 cents a proposal', 'For daily bidders'])}
+              ${plan('Unlimited', '$99', '/month', 'Unlimited proposals', ['No monthly cap', 'For heavy bidders'])}
+            </div>
+            <p class="secure">Payments are handled by Stripe. Copalat never sees your card.</p>
+          </section>`
+      },
+      async tile() {
+        document.body.classList.add('size-tile')
+        frame.innerHTML = `<section class="promo promo-tile">${logo}<h1>Copalat</h1><p>AI Upwork Proposal Writer</p></section>`
+      },
+      async marquee() {
+        document.body.classList.add('size-marquee')
+        frame.innerHTML = `
+          <section class="promo promo-marquee">
+            <div>
+              <div class="brand">${logo}<span>Copalat</span></div>
+              <h1>Upwork proposals that get opened, in seconds.</h1>
+              <p>AI cover letter generator and proposal writer for Chrome</p>
+            </div>
+            <div class="letter-card">
+              <div class="letter-head"><span>Cover letter</span><b>Insert</b><b class="ghost">Copy</b></div>
+              <p>Losing mobile buyers before the gallery loads is usually a theme problem rather than a hosting one, so it can be fixed without a redesign.</p>
+              <p>I would start by profiling the product template to find which scripts block the first paint.</p>
+              <p>Which theme is the store running at the moment?</p>
+            </div>
+          </section>`
+      },
+    }
+
+    scenes[scene]().then(() => document.body.setAttribute('data-ready', '1'))
+  </script>
+</body>
+</html>
