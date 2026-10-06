@@ -1340,3 +1340,47 @@ summary:focus-visible {
     border-radius: 22px;
   }
 }
+
+/* ---------- welcome page (opened after install) ---------- */
+
+.welcome {
+  padding-bottom: 112px;
+}
+
+.welcome .steps {
+  margin-top: 64px;
+}
+
+.welcome-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 48px;
+}
+
+.welcome-note {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.welcome-note svg {
+  flex: none;
+  color: var(--good);
+}
+
+@media (max-width: 720px) {
+  .welcome {
+    padding-bottom: 72px;
+  }
+
+  .welcome-actions {
+    flex-direction: column;
+  }
+}

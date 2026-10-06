@@ -20,9 +20,8 @@ export const site = {
     'Write winning Upwork proposals in seconds. Copalat is a Chrome extension that drafts a cover letter tailored to each job post, answers screening questions and inserts them for you. 5 proposals free.',
   // Public address of this site, used for canonical links, the sitemap and social previews.
   url: siteUrl(),
-  // TODO: set to Copalat's Chrome Web Store listing, e.g.
-  // https://chromewebstore.google.com/detail/<extension-id>
-  storeUrl: 'https://chromewebstore.google.com/',
+  // Copalat's Chrome Web Store listing.
+  storeUrl: 'https://chromewebstore.google.com/detail/pegclbgggajipbeekkdgmpccojjcjedd',
   // TODO: the address shown on the privacy, terms and contact links.
   supportEmail: 'support@your-domain.com',
   freeProposals: 5,

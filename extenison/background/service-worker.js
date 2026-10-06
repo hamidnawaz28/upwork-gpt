@@ -1,8 +1,13 @@
 // Service worker: owns the Supabase session and talks to the backend for the popup and
 // the widget on the Upwork proposal page. Each message { action, payload } is answered
 // with { ok: true, data } or { ok: false, error, ... }.
-import { UI_CONFIG } from '../lib/config.js'
+import { UI_CONFIG, WELCOME_URL } from '../lib/config.js'
 import { callFunction, getValidSession, signInWithGoogle, signOut } from '../lib/supabase.js'
+
+// Show the welcome page on a fresh install only, not on updates or browser restarts.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === chrome.runtime.OnInstalledReason.INSTALL) chrome.tabs.create({ url: WELCOME_URL })
+})
 
 const SIGNED_OUT = { user: null, account: null, selectors: {}, config: UI_CONFIG }
 

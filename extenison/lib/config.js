@@ -10,6 +10,9 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_5zSKmwia-iQC8ILaMMVJXA_QSxKyIuD
 export const GOOGLE_CLIENT_ID =
   '185322597233-b4t9cml2obqmlqsh72qgm54rptupbgip.apps.googleusercontent.com'
 
+// Opened in a new tab once, right after the extension is installed.
+export const WELCOME_URL = 'https://upwork-gpt-lyart.vercel.app/welcome'
+
 // Sent to the popup and the page widget with every state, so they need no imports.
 // Display only: prices and quotas are enforced on the server (Stripe + copalat_plan_limit).
 export const UI_CONFIG = {
