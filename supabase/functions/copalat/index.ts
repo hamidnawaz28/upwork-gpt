@@ -6,7 +6,7 @@
 //   POST /copalat/checkout       Stripe Checkout for a plan
 //   POST /copalat/portal         Stripe customer portal
 //   POST /copalat/webhook        Stripe webhook
-//   POST /copalat/models         OpenAI models for the admin dashboard (secret key only)
+//   POST /copalat/models         defaults and OpenAI models for the admin dashboard (secret key only)
 //   GET  /copalat/checkout-done  page shown after checkout
 //
 // Deployed with verify_jwt off: the user routes check the Supabase session themselves and
@@ -15,7 +15,7 @@
 // Secrets: OPENAI_API_KEY, STRIPE_SECRET_KEY (or COPALAT_STRIPE_SECRET_KEY),
 // optional COPALAT_STRIPE_WEBHOOK_SECRET and COPALAT_OPENAI_MODEL.
 import { checkoutDone, createCheckout, createPortal, handleWebhook, stripeConfigured, syncUser } from './billing.ts'
-import { generate, LENGTHS, listModels, TONES } from './generate.ts'
+import { adminConfig, generate, LENGTHS, TONES } from './generate.ts'
 import { admin, AppUser, getAccount, HttpError, json, requireService, requireUser } from './lib.ts'
 
 async function account(user: AppUser) {
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     if (route === 'webhook') return await handleWebhook(req)
     if (route === 'models') {
       await requireService(req)
-      return json(await listModels())
+      return json(await adminConfig())
     }
 
     const user = await requireUser(req)
