@@ -79,3 +79,27 @@ body {
   font-size: 12.5px;
   text-align: center;
 }
+
+/* Rows must not grow wider than the popup, however long their text is. */
+.history {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.history-item {
+  align-items: flex-start;
+}
+
+.history-title {
+  font-weight: 600;
+}
+
+.preview {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}

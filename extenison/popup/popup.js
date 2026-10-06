@@ -107,7 +107,9 @@
               el(
                 'div',
                 { class: 'grow' },
-                el('div', { class: 'truncate', text: item.job_title || item.content }),
+                item.job_title && el('div', { class: 'truncate history-title', text: item.job_title }),
+                // Two lines of the letter itself, so proposals can be told apart.
+                el('div', { class: 'preview', text: item.content }),
                 el('div', { class: 'muted', text: new Date(item.created_at).toLocaleDateString() }),
               ),
               copyButton(item.content),

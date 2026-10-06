@@ -692,3 +692,9 @@
     transform: none;
   }
 }
+
+/* Children of a column may shrink below their content, so long text is clipped or
+   wrapped inside the popup or widget and never stretches it. */
+.stack > * {
+  min-width: 0;
+}

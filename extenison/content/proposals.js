@@ -88,6 +88,25 @@
     return true
   }
 
+  // The job's title, so saved proposals can be told apart. Uses the configured selector,
+  // then the nearest heading above the description that is not a section label, then the
+  // first line of the description.
+  const jobTitle = (selectors, description) => {
+    const configured = textOf(selectors.title)
+    if (configured) return configured
+
+    const sectionLabel = /^(job details|submit a proposal|terms|cover letter|additional details|skills and expertise)$/i
+    let scope = queryAll(selectors.description)[0]?.parentElement
+    for (let depth = 0; scope && depth < 5; depth += 1, scope = scope.parentElement) {
+      const heading = [...scope.querySelectorAll('h1, h2, h3, h4')]
+        .map((node) => node.innerText?.trim() || '')
+        .find((text) => text.length > 8 && text.length < 200 && !sectionLabel.test(text))
+      if (heading) return heading
+    }
+    const firstLine = description.split('\n')[0].trim()
+    return firstLine.length > 80 ? `${firstLine.slice(0, 77)}...` : firstLine
+  }
+
   const prepareJobData = async (selectors) => {
     const more = queryAll(selectors.moreDescription)[0]
     if (more) {
@@ -96,10 +115,11 @@
     }
     const { coverLetter, questions } = findFormFields(selectors)
     fields = { coverLetter, questions: questions.map(({ field }) => field) }
+    const description = textOf(selectors.description)
     return {
       url: window.location.pathname,
-      title: textOf(selectors.title),
-      description: textOf(selectors.description),
+      title: jobTitle(selectors, description),
+      description,
       skillBadge: textOf(selectors.skillBadge),
       skills: queryAll(selectors.allTags)
         .map((tag) => tag.innerText?.trim())
