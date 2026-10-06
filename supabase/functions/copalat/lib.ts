@@ -47,3 +47,13 @@ export async function rpc<T = any>(fn: string, args: Record<string, unknown>): P
 
 export const getAccount = (user: AppUser) =>
   rpc('copalat_get_account', { p_user: user.id, p_email: user.email })
+
+// For routes called by the admin dashboard, which sends the project's secret key. The key
+// is checked by using it: only a service-role key can read copalat_config.
+export async function requireService(req: Request) {
+  const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '')
+  if (!token) throw new HttpError(401, 'Not allowed')
+  const client = createClient(SUPABASE_URL, token, { auth: { persistSession: false } })
+  const { data, error } = await client.from('copalat_config').select('key').limit(1)
+  if (error || !data?.length) throw new HttpError(401, 'Not allowed')
+}

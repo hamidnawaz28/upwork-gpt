@@ -61,12 +61,38 @@ function buildPrompt(input: Required<GenerateInput>, about: string, tone: string
   return parts.filter(Boolean).join('\n\n')
 }
 
+const DEFAULT_MODEL = 'gpt-4o-mini'
+
+// The model is chosen in the admin dashboard (copalat_config.openai_model). The
+// COPALAT_OPENAI_MODEL secret and then the default apply when nothing is saved there.
+async function currentModel() {
+  const { data } = await admin.from('copalat_config').select('value').eq('key', 'openai_model').maybeSingle()
+  const saved = typeof data?.value === 'string' ? data.value.trim() : ''
+  return /^[\w.:-]{1,64}$/.test(saved) ? saved : Deno.env.get('COPALAT_OPENAI_MODEL') ?? DEFAULT_MODEL
+}
+
+// Text models this OpenAI account can use, for the model picker in the admin dashboard.
+export async function listModels() {
+  const apiKey = Deno.env.get('OPENAI_API_KEY')
+  if (!apiKey) throw new HttpError(503, 'OPENAI_API_KEY is not set in the Edge Function secrets')
+  const res = await fetch('https://api.openai.com/v1/models', { headers: { Authorization: `Bearer ${apiKey}` } })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new HttpError(502, `OpenAI: ${data?.error?.message ?? 'could not list models'}`)
+
+  const models = (data.data as { id: string }[])
+    .map((model) => model.id)
+    .filter((id) => /^(gpt-|o\d|chatgpt-)/.test(id))
+    .filter((id) => !/audio|realtime|tts|transcribe|image|embedding|search|instruct|moderation|codex/.test(id))
+    .sort()
+  return { models, current: await currentModel(), defaultModel: DEFAULT_MODEL }
+}
+
 async function askOpenAi(apiKey: string, prompt: string) {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: Deno.env.get('COPALAT_OPENAI_MODEL') ?? 'gpt-4o-mini',
+      model: await currentModel(),
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -140,6 +166,13 @@ export async function generate(user: AppUser, body: GenerateInput) {
     result = await askOpenAi(apiKey, buildPrompt({ job, options }, settings.about, tone, length))
   } catch (err) {
     console.error(err)
+    // Kept for the admin's Settings page, so a wrong model name or an OpenAI billing
+    // problem can be seen without reading the function logs.
+    await admin.from('copalat_config').upsert({
+      key: 'last_ai_error',
+      value: { message: String((err as Error)?.message ?? err).slice(0, 500), model: await currentModel() },
+      updated_at: new Date().toISOString(),
+    })
     await rpc('copalat_refund_generation', { p_user: user.id, p_bucket: reserved.bucket })
     throw new HttpError(502, 'The AI could not write this proposal. Nothing was deducted, please try again.')
   }
