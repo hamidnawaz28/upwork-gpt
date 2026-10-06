@@ -4,3 +4,6 @@ background.js
 .DS_Store
 *.zip
 .env
+supabase/.temp/
+.next/
+.env.local
