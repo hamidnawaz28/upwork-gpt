@@ -18,8 +18,10 @@ export async function listProfiles(userId: string) {
 }
 
 // The profile to write a proposal from: the one asked for if it is the user's own,
-// otherwise their default. Null when they have none.
+// otherwise their default. Null when they have none, or when they chose "None" for
+// this proposal (the extension sends the id 'none').
 export async function profileFor(userId: string, profileId: unknown) {
+  if (profileId === 'none') return null
   const profiles = await listProfiles(userId)
   const chosen = typeof profileId === 'string' ? profiles.find((profile) => profile.id === profileId) : undefined
   return chosen ?? profiles.find((profile) => profile.is_default) ?? null

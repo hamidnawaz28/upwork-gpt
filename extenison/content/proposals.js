@@ -225,16 +225,19 @@
     planCards({ account, plans: config.plans, disabled: state.loading, onChoose: checkout, onManage: manage }),
   ]
 
+  // Sent as the profile id when the user wants no profile used; the server understands it.
+  const NO_PROFILE = { id: 'none', label: 'None', hint: 'Write without using a saved profile' }
+
   const generateView = (account, config, profiles) => [
-    // Only worth asking when there is a choice; with one profile it is simply used.
-    profiles.length > 1 &&
-      choiceGroup(
-        'Profile',
-        'chips',
-        profiles.map((profile) => ({ id: profile.id, label: profile.name })),
-        state.profileId || profiles.find((profile) => profile.is_default)?.id,
-        (value) => (state.profileId = value),
-      ),
+    // Always shown: the saved profiles plus "None", which writes without any profile.
+    // It starts on the default profile, so most of the time nothing needs picking.
+    choiceGroup(
+      'Profile',
+      'chips',
+      [...profiles.map((profile) => ({ id: profile.id, label: profile.name })), NO_PROFILE],
+      state.profileId || profiles.find((profile) => profile.is_default)?.id || NO_PROFILE.id,
+      (value) => (state.profileId = value),
+    ),
     choiceGroup('Tone', 'chips', config.tones, state.tone || account.settings.tone, (value) => (state.tone = value)),
     choiceGroup(
       'Length',
@@ -265,7 +268,7 @@
       !state.proposal &&
       el('div', {
         class: 'hint',
-        text: 'Tip: add your skills and experience in the Copalat toolbar popup, so proposals are written from your real background.',
+        text: 'You have no saved profile yet. Add one in the Copalat toolbar popup and it will appear above, so proposals are written from your real background.',
       }),
   ]
 
