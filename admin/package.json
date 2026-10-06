@@ -1,15 +1,17 @@
 {
-  "name": "copalat-site",
+  "name": "copalat-admin",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3200",
     "build": "next build",
-    "start": "next start -p 3000"
+    "start": "next start -p 3200"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2",
     "next": "^15",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^22",

@@ -1,0 +1,81 @@
+body {
+  width: 380px;
+  margin: 0;
+  background: var(--bg);
+}
+
+/* The popup follows the browser's theme; the widget on Upwork's page stays light. */
+@media (prefers-color-scheme: dark) {
+  .copalat.popup {
+    --bg: #0c1311;
+    --surface-2: #151f1c;
+    --border: #1f2c28;
+    --border-strong: #2c3d38;
+    --text: #edf4f1;
+    --text-2: #b7c6c1;
+    --muted: #8a9c96;
+    --brand: #2dd4bf;
+    --brand-bright: #5eead4;
+    --brand-ink: #99f6e4;
+    --brand-soft: #0e2b27;
+    --good: #34d399;
+    --good-soft: #0d2a20;
+    --bad: #f87171;
+    --bad-soft: #301514;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .copalat.popup .btn.primary {
+    color: #04201c;
+  }
+}
+
+#root {
+  padding: 16px;
+}
+
+.popup-head {
+  margin: -16px -16px 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background:
+    radial-gradient(260px 140px at 100% 0%, color-mix(in srgb, var(--brand-bright) 22%, transparent), transparent 70%),
+    var(--bg);
+}
+
+.account {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.history {
+  display: grid;
+  gap: 2px;
+}
+
+.history-item {
+  padding: 8px 8px 8px 10px;
+  border-radius: 10px;
+}
+
+.history-item:hover {
+  background: var(--surface-2);
+}
+
+.empty {
+  padding: 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+  text-align: center;
+}
