@@ -1,12 +1,25 @@
 // Everything about the product that the pages show. Edit here, not in the pages.
 
+// NEXT_PUBLIC_SITE_URL may be typed with or without "https://" (e.g. "example.com").
+// Anything that still is not a valid address falls back, so a typo cannot fail the build.
+function siteUrl() {
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || '').trim()
+  const fallback = 'http://localhost:3000'
+  if (!raw) return fallback
+  try {
+    return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).origin
+  } catch {
+    return fallback
+  }
+}
+
 export const site = {
   name: 'Copalat',
   title: 'Copalat: AI Upwork Proposal Writer & Cover Letter Generator',
   description:
     'Write winning Upwork proposals in seconds. Copalat is a Chrome extension that drafts a cover letter tailored to each job post, answers screening questions and inserts them for you. 5 proposals free.',
   // Public address of this site, used for canonical links, the sitemap and social previews.
-  url: (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, ''),
+  url: siteUrl(),
   // TODO: set to Copalat's Chrome Web Store listing, e.g.
   // https://chromewebstore.google.com/detail/<extension-id>
   storeUrl: 'https://chromewebstore.google.com/',
