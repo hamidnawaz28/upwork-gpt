@@ -2,6 +2,7 @@
 // call fails, so users are only ever charged for proposals they actually received.
 import { stripeConfigured, syncUser } from './billing.ts'
 import { admin, AppUser, HttpError, rpc } from './lib.ts'
+import { profileFor } from './profiles.ts'
 
 export const TONES: Record<string, string> = {
   professional: 'calm, precise and businesslike, the way a senior consultant writes to a new client',
@@ -28,7 +29,7 @@ interface GenerateInput {
     url?: string
     questions?: string[]
   }
-  options?: { tone?: string; length?: string; instructions?: string }
+  options?: { tone?: string; length?: string; instructions?: string; profileId?: string }
 }
 
 const DEFAULT_MODEL = 'gpt-4o-mini'
@@ -219,10 +220,12 @@ export async function generate(user: AppUser, body: GenerateInput) {
   const length = LENGTHS[body.options?.length ?? ''] ? body.options!.length! : settings.length
   const options = { tone, length, instructions: clip(body.options?.instructions, 500) }
   const config = await loadConfig()
+  // The profile picked for this proposal, or the user's default one.
+  const profile = await profileFor(user.id, body.options?.profileId)
 
   let result: Awaited<ReturnType<typeof askOpenAi>>
   try {
-    result = await askOpenAi(apiKey, config, buildPrompt({ job, options }, settings.about, tone, length))
+    result = await askOpenAi(apiKey, config, buildPrompt({ job, options }, profile?.about ?? '', tone, length))
   } catch (err) {
     console.error(err)
     // Kept for the admin's Settings page, so a wrong model name or an OpenAI billing
@@ -240,6 +243,10 @@ export async function generate(user: AppUser, body: GenerateInput) {
     user_id: user.id,
     job_url: job.url,
     job_title: job.title,
+    job_description: job.description,
+    job_skills: job.skills,
+    instructions: options.instructions || null,
+    profile_name: profile?.name ?? null,
     tone,
     length,
     content: result.coverLetter,

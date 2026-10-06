@@ -27,6 +27,7 @@
     tone: '',
     length: '',
     instructions: '',
+    profileId: '', // empty means the user's default profile
   }
   // Page fields found when the proposal was generated, used by the Insert buttons.
   let fields = { coverLetter: undefined, questions: [] }
@@ -156,9 +157,9 @@
       state.generating = true
       render()
       const job = await prepareJobData(state.app.selectors)
-      const { tone, length, instructions } = state
+      const { tone, length, instructions, profileId } = state
       try {
-        state.proposal = await request('GENERATE', { job, options: { tone, length, instructions } })
+        state.proposal = await request('GENERATE', { job, options: { tone, length, instructions, profileId } })
         state.app.account = state.proposal.account
       } catch (error) {
         // Out of proposals: the server sends the up to date account so the plans show.
@@ -224,7 +225,16 @@
     planCards({ account, plans: config.plans, disabled: state.loading, onChoose: checkout, onManage: manage }),
   ]
 
-  const generateView = (account, config) => [
+  const generateView = (account, config, profiles) => [
+    // Only worth asking when there is a choice; with one profile it is simply used.
+    profiles.length > 1 &&
+      choiceGroup(
+        'Profile',
+        'chips',
+        profiles.map((profile) => ({ id: profile.id, label: profile.name })),
+        state.profileId || profiles.find((profile) => profile.is_default)?.id,
+        (value) => (state.profileId = value),
+      ),
     choiceGroup('Tone', 'chips', config.tones, state.tone || account.settings.tone, (value) => (state.tone = value)),
     choiceGroup(
       'Length',
@@ -251,7 +261,7 @@
       { disabled: state.loading, onclick: generate },
       state.proposal ? 'refresh' : 'sparkles',
     ),
-    !account.settings.about &&
+    !profiles.length &&
       !state.proposal &&
       el('div', {
         class: 'hint',
@@ -291,7 +301,7 @@
     return [
       !app.user && signInView(config),
       account && account.remaining <= 0 && upgradeView(account, config),
-      account && account.remaining > 0 && generateView(account, config),
+      account && account.remaining > 0 && generateView(account, config, app.profiles || []),
       state.generating ? skeleton() : state.proposal && proposalView(state.proposal),
     ]
   }

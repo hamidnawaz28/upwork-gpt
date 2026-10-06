@@ -40,6 +40,10 @@ export type AdminProposal = {
   length: string | null
   content: string
   answers: { question: string; answer: string }[]
+  job_description: string | null
+  job_skills: string[] | null
+  instructions: string | null
+  profile_name: string | null
   created_at: string
 }
 
@@ -80,4 +84,13 @@ export async function adminDb() {
 export function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
   if (error) throw new Error(error.message)
   return data as T
+}
+
+// A row of copalat_freelancer_profiles: one of the profiles a user has saved.
+export type FreelancerProfile = {
+  id: string
+  name: string
+  about: string
+  is_default: boolean
+  updated_at: string
 }

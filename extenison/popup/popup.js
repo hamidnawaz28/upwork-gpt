@@ -1,13 +1,14 @@
-// Toolbar popup: sign in, plan and usage, the freelancer profile used to personalise
-// proposals, and recent proposals.
+// Toolbar popup: sign in, plan and usage, the freelancer's saved profiles and default
+// tone / length, and recent proposals.
 ;(() => {
   const { el, icon, googleMark, request, alertBox, button, usageCard, planCards, choiceGroup, copyButton, skeleton } =
     Copalat
   const root = document.getElementById('root')
 
   const state = {
-    app: null, // { user, account, selectors, config } from the background
-    settings: null, // editable copy of account.settings
+    app: null, // { user, account, selectors, profiles, config } from the background
+    settings: null, // editable copy of account.settings (default tone and length)
+    editing: null, // the profile open in the editor: { id?, name, about }, or null
     history: [],
     loading: true,
     error: '',
@@ -29,17 +30,157 @@
   const applyState = async (app) => {
     state.app = app
     state.settings = app.account ? { ...app.account.settings } : null
+    state.editing = null
     state.history = app.user ? (await request('GET_HISTORY')).proposals : []
   }
 
   const load = (action) => run(async () => applyState(await request(action)))
   const checkout = (plan) => run(() => request('CHECKOUT', { plan }))
   const manage = () => run(() => request('PORTAL'))
-  const save = () =>
+
+  // ---------- profiles ----------
+
+  const changeProfiles = (payload, notice) =>
     run(async () => {
-      await request('SAVE_SETTINGS', state.settings)
-      state.notice = 'Saved. New proposals will use this profile.'
+      const { profiles, account } = await request('PROFILES', payload)
+      Object.assign(state.app, { profiles, account })
+      state.editing = null
+      state.notice = notice
     })
+
+  const edit = (profile) => {
+    state.editing = profile ? { ...profile } : { name: '', about: '' }
+    Object.assign(state, { error: '', notice: '' })
+    render()
+  }
+
+  const closeEditor = () => {
+    state.editing = null
+    render()
+  }
+
+  const saveProfile = () => {
+    const { id, name, about } = state.editing
+    // The first profile becomes the default without the user having to say so.
+    const makeDefault = !state.app.profiles.length
+    changeProfiles({ action: 'save', id, name, about, makeDefault }, 'Profile saved.')
+  }
+
+  const profileEditor = () => {
+    const { editing } = state
+    return el(
+      'div',
+      { class: 'editor stack tight' },
+      el(
+        'label',
+        { class: 'field' },
+        el('span', { class: 'label', text: 'Profile name' }),
+        el('input', {
+          type: 'text',
+          maxLength: 60,
+          placeholder: 'e.g. Shopify developer',
+          value: editing.name,
+          oninput: (event) => (editing.name = event.target.value),
+        }),
+      ),
+      el(
+        'label',
+        { class: 'field' },
+        el('span', { class: 'label', text: 'Skills, experience and results' }),
+        el('textarea', {
+          rows: 6,
+          maxLength: 3000,
+          placeholder: 'e.g. 6 years building Shopify stores. Shipped 40+ stores, cut load time by half on three of them.',
+          value: editing.about,
+          oninput: (event) => (editing.about = event.target.value),
+        }),
+        el('span', { class: 'hint', text: 'Proposals only claim what you write here. Nothing is invented.' }),
+      ),
+      el(
+        'div',
+        { class: 'row' },
+        button('dark grow', editing.id ? 'Save changes' : 'Save profile', { disabled: state.loading, onclick: saveProfile }),
+        button('ghost', 'Cancel', { onclick: closeEditor }),
+      ),
+    )
+  }
+
+  const profileRow = (profile) =>
+    el(
+      'div',
+      { class: profile.is_default ? 'profile profile-default' : 'profile' },
+      el(
+        'div',
+        { class: 'row' },
+        el('div', { class: 'truncate grow profile-name', text: profile.name }),
+        profile.is_default && el('span', { class: 'pill', text: 'Default' }),
+      ),
+      el('div', { class: 'preview', text: profile.about }),
+      el(
+        'div',
+        { class: 'row profile-actions' },
+        el('button', { type: 'button', class: 'link', text: 'Edit', onclick: () => edit(profile) }),
+        !profile.is_default &&
+          el('button', {
+            type: 'button',
+            class: 'link',
+            text: 'Make default',
+            onclick: () => changeProfiles({ action: 'default', id: profile.id }, `"${profile.name}" is now your default.`),
+          }),
+        el('button', {
+          type: 'button',
+          class: 'link link-danger',
+          text: 'Delete',
+          onclick: () => changeProfiles({ action: 'delete', id: profile.id }, 'Profile deleted.'),
+        }),
+      ),
+    )
+
+  const profilesView = () => {
+    const { profiles } = state.app
+    return [
+      el(
+        'div',
+        { class: 'row between' },
+        el('div', { class: 'subtitle' }, icon('user', 13), el('span', { text: 'Your profiles' })),
+        !state.editing &&
+          profiles.length > 0 &&
+          el('button', { type: 'button', class: 'link', text: '+ New profile', onclick: () => edit() }),
+      ),
+      state.editing
+        ? profileEditor()
+        : profiles.length
+        ? profiles.map(profileRow)
+        : el(
+            'div',
+            { class: 'empty stack tight' },
+            el('span', {
+              text: 'Add a profile so proposals are written from your real skills and results. You can keep several, one per kind of work.',
+            }),
+            button('dark', 'Create your first profile', { onclick: () => edit() }),
+          ),
+    ]
+  }
+
+  // ---------- defaults ----------
+
+  // Tone and length are saved as soon as they are picked.
+  const saveDefault = (key, value) => {
+    state.settings[key] = value
+    run(async () => {
+      const { account } = await request('SAVE_SETTINGS', state.settings)
+      state.app.account = account
+      state.notice = 'Default saved.'
+    })
+  }
+
+  const defaultsView = (config) => [
+    el('div', { class: 'subtitle' }, icon('sparkles', 13), el('span', { text: 'Defaults' })),
+    choiceGroup('Tone', 'chips', config.tones, state.settings.tone, (value) => saveDefault('tone', value)),
+    choiceGroup('Length', 'segments', config.lengths, state.settings.length, (value) => saveDefault('length', value)),
+  ]
+
+  // ---------- the rest ----------
 
   const signedOutView = (config) =>
     el(
@@ -66,33 +207,6 @@
         text: `${config.freeTrial} proposals free, no card. Then from ${config.plans[0].price} a month.`,
       }),
     )
-
-  const profileView = (config) => {
-    const { settings } = state
-    return [
-      el('div', { class: 'subtitle' }, icon('user', 13), el('span', { text: 'Your profile' })),
-      el(
-        'label',
-        { class: 'field' },
-        el('textarea', {
-          rows: 5,
-          maxLength: 3000,
-          'aria-label': 'Skills, experience and results',
-          placeholder:
-            'Your skills, experience and results. e.g. Shopify developer, 6 years. Built 40+ stores, speed optimisation, custom themes.',
-          value: settings.about,
-          oninput: (event) => (settings.about = event.target.value),
-        }),
-        el('span', {
-          class: 'hint',
-          text: 'Proposals only claim what you write here. Nothing is invented.',
-        }),
-      ),
-      choiceGroup('Default tone', 'chips', config.tones, settings.tone, (value) => (settings.tone = value)),
-      choiceGroup('Default length', 'segments', config.lengths, settings.length, (value) => (settings.length = value)),
-      button('dark wide', 'Save profile', { disabled: state.loading, onclick: save }),
-    ]
-  }
 
   const historyView = () => [
     el('div', { class: 'subtitle' }, icon('history', 13), el('span', { text: 'Recent proposals' })),
@@ -140,7 +254,9 @@
     usageCard(account),
     planCards({ account, plans: config.plans, disabled: state.loading, onChoose: checkout, onManage: manage }),
     el('hr', { class: 'divider' }),
-    profileView(config),
+    profilesView(),
+    el('hr', { class: 'divider' }),
+    defaultsView(config),
     el('hr', { class: 'divider' }),
     historyView(),
   ]

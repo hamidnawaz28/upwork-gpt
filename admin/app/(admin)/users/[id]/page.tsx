@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PlanBadge, Quota, Stat } from '@/components/ui'
-import { adminDb, unwrap, type AdminProposal, type AdminUser } from '@/lib/db'
+import { adminDb, unwrap, type AdminProposal, type AdminUser, type FreelancerProfile } from '@/lib/db'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/lib/format'
 
 export default async function UserPage({ params }: { params: Promise<{ id: string }> }) {
@@ -9,7 +9,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
 
   const db = await adminDb()
-  const [user, proposals] = await Promise.all([
+  const [user, proposals, profiles] = await Promise.all([
     db.from('copalat_admin_users').select('*').eq('id', id).maybeSingle().then(unwrap<AdminUser | null>),
     db
       .from('copalat_admin_proposals')
@@ -18,6 +18,13 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
       .order('created_at', { ascending: false })
       .limit(100)
       .then(unwrap<AdminProposal[]>),
+    db
+      .from('copalat_freelancer_profiles')
+      .select('id, name, about, is_default, updated_at')
+      .eq('user_id', id)
+      .order('is_default', { ascending: false })
+      .order('created_at')
+      .then(unwrap<FreelancerProfile[]>),
   ])
   if (!user) notFound()
 
@@ -89,13 +96,21 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
 
         <section className="card">
           <div className="card-head">
-            <h2>Freelancer profile</h2>
+            <h2>
+              Saved profiles <span className="count">{formatNumber(profiles.length)}</span>
+            </h2>
           </div>
-          {user.about ? (
-            <p className="proposal">{user.about}</p>
-          ) : (
-            <p className="empty">This user has not filled in a profile.</p>
-          )}
+          {profiles.map((profile) => (
+            <div key={profile.id} className="saved-profile">
+              <div className="saved-profile-head">
+                <strong>{profile.name}</strong>
+                {profile.is_default && <span className="badge badge-starter">Default</span>}
+                <span className="muted">Updated {timeAgo(profile.updated_at)}</span>
+              </div>
+              <p>{profile.about}</p>
+            </div>
+          ))}
+          {!profiles.length && <p className="empty">This user has not saved a profile.</p>}
         </section>
       </div>
 

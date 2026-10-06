@@ -1101,3 +1101,33 @@ textarea:focus {
   background: var(--surface);
   color: var(--text);
 }
+
+/* A user's saved freelancer profiles, on their page. */
+.saved-profile {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.saved-profile:last-child {
+  border-bottom: 0;
+}
+
+.saved-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.saved-profile-head .muted {
+  margin-left: auto;
+  font-size: 12.5px;
+}
+
+.saved-profile p {
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}

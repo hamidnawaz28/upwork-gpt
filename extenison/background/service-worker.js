@@ -9,14 +9,14 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === chrome.runtime.OnInstalledReason.INSTALL) chrome.tabs.create({ url: WELCOME_URL })
 })
 
-const SIGNED_OUT = { user: null, account: null, selectors: {}, config: UI_CONFIG }
+const SIGNED_OUT = { user: null, account: null, selectors: {}, profiles: [], config: UI_CONFIG }
 
 async function getState() {
   const session = await getValidSession()
   if (!session) return SIGNED_OUT
   try {
-    const { account, selectors } = await callFunction('account')
-    return { user: session.user, account, selectors, config: UI_CONFIG }
+    const { account, selectors, profiles } = await callFunction('account')
+    return { user: session.user, account, selectors, profiles: profiles || [], config: UI_CONFIG }
   } catch (error) {
     if (error?.details?.code === 'auth') return SIGNED_OUT
     throw error
@@ -40,6 +40,7 @@ const handlers = {
   },
   GENERATE: (payload) => callFunction('generate', payload),
   SAVE_SETTINGS: (payload) => callFunction('settings', payload),
+  PROFILES: (payload) => callFunction('profiles', payload),
   GET_HISTORY: () => callFunction('history'),
   CHECKOUT: (payload) => openTab('checkout', { plan: payload?.plan }),
   PORTAL: () => openTab('portal'),

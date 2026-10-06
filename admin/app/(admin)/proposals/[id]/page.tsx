@@ -54,6 +54,14 @@ export default async function ProposalPage({ params }: { params: Promise<{ id: s
               '—'
             )}
           </dd>
+          <dt>Profile used</dt>
+          <dd>{proposal.profile_name || 'None'}</dd>
+          {proposal.instructions && (
+            <>
+              <dt>Extra instructions</dt>
+              <dd>{proposal.instructions}</dd>
+            </>
+          )}
         </dl>
       </section>
 
@@ -62,6 +70,18 @@ export default async function ProposalPage({ params }: { params: Promise<{ id: s
           <h2>Cover letter</h2>
         </div>
         <p className="proposal">{proposal.content}</p>
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Job post</h2>
+          {proposal.job_skills?.length ? <span className="muted">{proposal.job_skills.join(' · ')}</span> : null}
+        </div>
+        {proposal.job_description ? (
+          <p className="proposal">{proposal.job_description}</p>
+        ) : (
+          <p className="empty">The job text was not saved for proposals written before this was added.</p>
+        )}
       </section>
 
       {proposal.answers?.map((item, index) => (

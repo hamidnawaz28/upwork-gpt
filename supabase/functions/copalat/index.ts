@@ -1,7 +1,8 @@
 // Copalat backend. One function, routed by the last path segment:
 //   POST /copalat/account        account, usage, settings and page selectors
-//   POST /copalat/settings       save the freelancer profile and defaults
+//   POST /copalat/settings       save the default tone and length
 //   POST /copalat/generate       write a proposal (counts against the trial / plan)
+//   POST /copalat/profiles       add, edit, delete or set the default freelancer profile
 //   POST /copalat/history        recent proposals
 //   POST /copalat/checkout       Stripe Checkout for a plan
 //   POST /copalat/portal         Stripe customer portal
@@ -17,6 +18,7 @@
 import { checkoutDone, createCheckout, createPortal, handleWebhook, stripeConfigured, syncUser } from './billing.ts'
 import { adminConfig, generate, LENGTHS, TONES } from './generate.ts'
 import { admin, AppUser, getAccount, HttpError, json, requireService, requireUser } from './lib.ts'
+import { listProfiles, manageProfiles } from './profiles.ts'
 
 async function account(user: AppUser) {
   let info = await getAccount(user)
@@ -25,12 +27,11 @@ async function account(user: AppUser) {
     info = await getAccount(user)
   }
   const { data } = await admin.from('copalat_config').select('value').eq('key', 'selectors').maybeSingle()
-  return { account: info, selectors: data?.value ?? {} }
+  return { account: info, selectors: data?.value ?? {}, profiles: await listProfiles(user.id) }
 }
 
 async function saveSettings(user: AppUser, body: Record<string, unknown>) {
   const update: Record<string, string> = {}
-  if (typeof body.about === 'string') update.about = body.about.trim().slice(0, 3000)
   if (typeof body.tone === 'string' && TONES[body.tone]) update.tone = body.tone
   if (typeof body.length === 'string' && LENGTHS[body.length]) update.length = body.length
 
@@ -73,6 +74,8 @@ Deno.serve(async (req) => {
         return json(await saveSettings(user, body))
       case 'generate':
         return json(await generate(user, body))
+      case 'profiles':
+        return json(await manageProfiles(user, body))
       case 'history':
         return json(await history(user))
       case 'checkout':

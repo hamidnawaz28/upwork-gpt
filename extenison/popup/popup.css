@@ -103,3 +103,44 @@ body {
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+
+/* ---------- saved profiles ---------- */
+
+.profile {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.profile-default {
+  border-color: var(--brand);
+  background: linear-gradient(160deg, var(--brand-soft), var(--bg) 70%);
+}
+
+.profile-name {
+  font-weight: 600;
+}
+
+.profile-actions {
+  gap: 14px;
+}
+
+.link-danger {
+  color: var(--bad);
+}
+
+.editor {
+  padding: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+}
+
+.btn.grow {
+  flex: 1;
+}
+
+.empty.stack {
+  align-items: center;
+}
