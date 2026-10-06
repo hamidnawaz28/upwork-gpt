@@ -698,3 +698,18 @@
 .stack > * {
   min-width: 0;
 }
+
+/* With three plans on offer, the third takes the full row under the first two. */
+.plans > .plan:nth-child(3):last-child {
+  grid-column: 1 / -1;
+}
+
+/* Items in the scrolling panel keep their full height. Without this, a long proposal is
+   squeezed to fit and its text is cut off instead of the panel scrolling. */
+.widget-body > * {
+  flex-shrink: 0;
+}
+
+.widget-body {
+  overscroll-behavior: contain;
+}

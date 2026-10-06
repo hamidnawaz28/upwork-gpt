@@ -59,6 +59,16 @@ export const plans = [
     featured: false,
     points: ['25 cents a proposal', 'For freelancers who bid daily', 'Cancel any time'],
   },
+  {
+    id: 'unlimited',
+    name: 'Unlimited',
+    price: '$99',
+    period: '/month',
+    proposals: 'Unlimited proposals',
+    cta: 'Start free, upgrade later',
+    featured: false,
+    points: ['No monthly cap', 'For agencies and heavy bidders', 'Cancel any time'],
+  },
 ]
 
 export const steps = [
@@ -122,7 +132,7 @@ export const faqs = [
   {
     question: 'What happens after the 5 free proposals?',
     answer:
-      'You choose a plan inside the extension: Starter is $9 a month for 30 proposals and Pro is $15 a month for 60. Payment is handled by Stripe.',
+      'You choose a plan inside the extension: Starter is $9 a month for 30 proposals, Pro is $15 a month for 60, and Unlimited is $99 a month with no cap. Payment is handled by Stripe.',
   },
   {
     question: 'Can I cancel?',

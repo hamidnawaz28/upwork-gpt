@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { requireAdmin } from './auth'
 
 // List prices per month, for the revenue estimate. Stripe is the source of truth.
-export const PLAN_PRICES = { starter: 9, pro: 15 } as const
+export const PLAN_PRICES = { starter: 9, pro: 15, unlimited: 99 } as const
 
 // Rows of the copalat_admin_* views (supabase/migrations/*_copalat_admin.sql).
 export type AdminUser = {
@@ -14,7 +14,7 @@ export type AdminUser = {
   created_at: string
   last_sign_in_at: string | null
   is_paid: boolean
-  plan: 'starter' | 'pro' | null
+  plan: 'starter' | 'pro' | 'unlimited' | null
   billing_status: string | null
   current_period_end: string | null
   cancel_at_period_end: boolean
@@ -52,6 +52,7 @@ export type AdminStats = {
   paid_total: number
   paid_starter: number
   paid_pro: number
+  paid_unlimited: number
   paid_cancelling: number
   payment_failing: number
   trial_ended: number

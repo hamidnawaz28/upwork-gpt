@@ -42,7 +42,10 @@ export default function TermsPage() {
         <h2>Plans and payment</h2>
         <ul>
           <li>New accounts get {site.freeProposals} free proposals, once.</li>
-          <li>Starter is $9 per month for 30 proposals. Pro is $15 per month for 60 proposals.</li>
+          <li>
+            Starter is $9 per month for 30 proposals. Pro is $15 per month for 60 proposals. Unlimited is $99 per month
+            with no monthly cap, for one person&apos;s own proposals.
+          </li>
           <li>Each Generate or Regenerate uses one proposal. A failed generation is not counted.</li>
           <li>Plans renew monthly until cancelled. Unused proposals do not carry over to the next period.</li>
           <li>

@@ -21,6 +21,11 @@ const PLANS: Record<string, { name: string; amount: number; lookupKey: string }>
     amount: 1500,
     lookupKey: 'copalat_pro_monthly',
   },
+  unlimited: {
+    name: 'Copalat Unlimited (unlimited proposals / month)',
+    amount: 9900,
+    lookupKey: 'copalat_unlimited_monthly',
+  },
 }
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider()

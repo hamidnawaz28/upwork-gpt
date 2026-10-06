@@ -20,6 +20,8 @@ export const UI_CONFIG = {
   plans: [
     { id: 'starter', name: 'Starter', price: '$9', proposals: 30 },
     { id: 'pro', name: 'Pro', price: '$15', proposals: 60 },
+    // No `proposals` number means no monthly cap.
+    { id: 'unlimited', name: 'Unlimited', price: '$99' },
   ],
   tones: [
     { id: 'professional', label: 'Professional' },

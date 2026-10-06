@@ -171,7 +171,7 @@ async function askOpenAi(apiKey: string, config: { model: string; prompt: string
 }
 
 const LIMIT_MESSAGES: Record<string, string> = {
-  trial_ended: 'You have used your 5 free proposals. Pick a plan to keep going.',
+  trial_ended: 'You have used your free proposals. Pick a plan to keep going.',
   plan_limit: 'You have used all the proposals in your plan for this billing period.',
   needs_sync: 'We could not confirm your subscription. Please try again in a minute.',
 }

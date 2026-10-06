@@ -86,8 +86,12 @@ const Copalat = (() => {
 
   const wordCount = (text) => text.trim().split(/\s+/).filter(Boolean).length
 
-  const usageLabel = (account) =>
-    account.active ? `${account.remaining} of ${account.limit} left` : `${account.remaining} of ${account.limit} free left`
+  const usageLabel = (account) => {
+    if (account.unlimited) return 'Unlimited'
+    return account.active
+      ? `${account.remaining} of ${account.limit} left`
+      : `${account.remaining} of ${account.limit} free left`
+  }
 
   const usagePill = (account) =>
     el('span', { class: account.remaining > 0 ? 'pill' : 'pill pill-empty', text: usageLabel(account) })
@@ -101,6 +105,19 @@ const Copalat = (() => {
 
   // Usage as a headline number with a meter, for the popup.
   const usageCard = (account) => {
+    // The Unlimited plan has nothing to count down, so it shows what has been written.
+    if (account.unlimited) {
+      return el(
+        'div',
+        { class: 'usage' },
+        el(
+          'div',
+          { class: 'usage-top' },
+          el('div', {}, el('strong', { text: 'Unlimited' })),
+          el('span', { class: 'muted', text: `${account.used} written this month` }),
+        ),
+      )
+    }
     const percent = Math.min((account.used / Math.max(account.limit, 1)) * 100, 100)
     const bar = el('span', { class: account.remaining > 0 ? '' : 'empty' })
     bar.style.width = `${percent}%`
@@ -146,7 +163,10 @@ const Copalat = (() => {
               el('strong', { text: plan.price }),
               el('span', { text: '/mo' }),
             ),
-            el('span', { class: 'plan-quota', text: `${plan.proposals} proposals a month` }),
+            el('span', {
+              class: 'plan-quota',
+              text: plan.proposals ? `${plan.proposals} proposals a month` : 'Unlimited proposals',
+            }),
             el('span', { class: 'plan-cta' }, el('span', { text: account.active ? 'Switch' : 'Choose' }), icon('arrow', 13)),
           ),
         ),

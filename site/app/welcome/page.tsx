@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Celebration } from '@/components/Celebration'
 import { Icon } from '@/components/Icon'
 import { site } from '@/lib/site'
 
@@ -29,6 +30,11 @@ const STEPS = [
 export default function WelcomePage() {
   return (
     <main>
+      <Celebration />
+      <p className="pin-hint" aria-hidden="true">
+        <Icon name="arrow" size={16} />
+        Pin Copalat up here
+      </p>
       <section className="hero welcome">
         <div className="hero-bg" aria-hidden="true" />
         <div className="wrap hero-copy">
@@ -37,6 +43,11 @@ export default function WelcomePage() {
             Copalat is installed
           </p>
           <h1>
+            Welcome aboard{' '}
+            <span className="wave" aria-hidden="true">
+              👋
+            </span>
+            <br />
             You’re <em>three steps</em> from your first proposal.
           </h1>
           <p className="lead">
@@ -57,7 +68,7 @@ export default function WelcomePage() {
           </ol>
 
           <div className="welcome-actions">
-            <a href="https://www.upwork.com/nx/find-work/" className="btn btn-large">
+            <a href="https://www.upwork.com/nx/find-work/" className="btn btn-large btn-pulse">
               Find a job on Upwork
               <Icon name="arrow" size={16} />
             </a>

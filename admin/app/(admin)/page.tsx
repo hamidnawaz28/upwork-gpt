@@ -37,7 +37,10 @@ export default async function OverviewPage() {
       .then(unwrap<AdminProposal[]>),
   ])
 
-  const mrr = stats.paid_starter * PLAN_PRICES.starter + stats.paid_pro * PLAN_PRICES.pro
+  const mrr =
+    stats.paid_starter * PLAN_PRICES.starter +
+    stats.paid_pro * PLAN_PRICES.pro +
+    stats.paid_unlimited * PLAN_PRICES.unlimited
   const freeUsers = stats.users_total - stats.paid_total
   // Everyone paying has been through the trial, so they count as having used it up.
   const funnel = [
@@ -100,6 +103,7 @@ export default async function OverviewPage() {
       <section className="stats stats-small">
         <Stat label={`Starter ($${PLAN_PRICES.starter})`} value={formatNumber(stats.paid_starter)} />
         <Stat label={`Pro ($${PLAN_PRICES.pro})`} value={formatNumber(stats.paid_pro)} />
+        <Stat label={`Unlimited ($${PLAN_PRICES.unlimited})`} value={formatNumber(stats.paid_unlimited)} />
         <Stat
           label="Free users"
           value={formatNumber(freeUsers)}

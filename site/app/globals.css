@@ -897,8 +897,8 @@ summary:focus-visible {
 
 .plans {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
   margin-top: 56px;
   align-items: stretch;
 }
@@ -1383,4 +1383,251 @@ summary:focus-visible {
   .welcome-actions {
     flex-direction: column;
   }
+}
+
+/* Four plan cards are too tight on mid-sized screens, so they go two by two there. */
+@media (min-width: 961px) and (max-width: 1140px) {
+  .plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 20px;
+  }
+}
+
+@media (min-width: 961px) {
+  .plan {
+    padding: 28px 22px 24px;
+  }
+
+  .price {
+    font-size: 2.8rem;
+  }
+}
+
+/* ---------- welcome page: balloons, confetti, toolbar pointer ---------- */
+
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.balloon {
+  position: absolute;
+  bottom: -160px;
+  width: var(--size);
+  height: calc(var(--size) * 1.22);
+  border-radius: 50% 50% 50% 50% / 46% 46% 54% 54%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.75), transparent 34%),
+    var(--color);
+  box-shadow: inset -6px -10px 14px rgba(0, 0, 0, 0.14);
+  opacity: 0;
+  animation: balloon-rise 8s cubic-bezier(0.3, 0.1, 0.3, 1) 1 both;
+}
+
+/* The knot and the string. */
+.balloon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  border: 5px solid transparent;
+  border-bottom-color: var(--color);
+  transform: translateX(-50%);
+}
+
+.balloon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: calc(var(--size) * 1.5);
+  margin-top: 6px;
+  background: linear-gradient(var(--muted), transparent);
+}
+
+@keyframes balloon-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  8% {
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(var(--sway), -62vh) rotate(4deg);
+  }
+  90% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--sway) * -1), -128vh) rotate(-4deg);
+  }
+}
+
+.confetti {
+  position: absolute;
+  top: -24px;
+  opacity: 0;
+  animation: confetti-fall 4s linear 1 both;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift), 104vh) rotate(var(--spin));
+  }
+}
+
+/* The headline lands with a little bounce. */
+.welcome .eyebrow {
+  animation: pop-in 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.welcome h1 {
+  animation: pop-in 0.7s cubic-bezier(0.2, 1.2, 0.4, 1) 0.1s both;
+}
+
+.wave {
+  display: inline-block;
+  transform-origin: 70% 80%;
+  animation: wave 1.6s ease-in-out 0.8s 3;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(18deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(14deg);
+  }
+  80% {
+    transform: rotate(-6deg);
+  }
+}
+
+/* Points at Chrome's toolbar, where the extension has to be pinned. */
+.pin-hint {
+  position: fixed;
+  top: 78px;
+  right: 22px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 0.9rem;
+  font-weight: 550;
+  box-shadow: var(--shadow-md);
+  animation: pin-bob 1.4s ease-in-out infinite;
+}
+
+.pin-hint::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 26px;
+  border: 8px solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--ink);
+}
+
+.pin-hint svg {
+  flex: none;
+  transform: rotate(-90deg);
+}
+
+@keyframes pin-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.welcome .steps .step {
+  animation: pop-in 0.6s ease both;
+}
+
+.welcome .steps .step:nth-child(1) {
+  animation-delay: 0.35s;
+}
+
+.welcome .steps .step:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.welcome .steps .step:nth-child(3) {
+  animation-delay: 0.65s;
+}
+
+/* The main button pulses gently until it is used. */
+.btn-pulse {
+  animation: btn-pulse 2s ease-out 1.2s infinite;
+}
+
+@keyframes btn-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-bright) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 16px transparent;
+  }
+}
+
+@media (max-width: 720px) {
+  .pin-hint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebration {
+    display: none;
+  }
+
+  .pin-hint,
+  .btn-pulse,
+  .wave,
+  .welcome .eyebrow,
+  .welcome h1,
+  .welcome .steps .step {
+    animation: none;
+  }
+}
+
+.welcome .hero-copy h1 {
+  max-width: 20ch;
+  font-size: clamp(2.2rem, 5.2vw, 3.8rem);
 }

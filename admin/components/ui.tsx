@@ -89,16 +89,27 @@ export function PlanBadge({
     const failing = user.billing_status === 'past_due' || user.billing_status === 'unpaid'
     return failing ? <span className="badge badge-warn">Payment failing</span> : <span className="badge">Free</span>
   }
+  const label = user.plan === 'unlimited' ? 'Unlimited' : user.plan === 'pro' ? 'Pro' : 'Starter'
   return (
-    <span className={user.plan === 'pro' ? 'badge badge-pro' : 'badge badge-starter'}>
-      {user.plan === 'pro' ? 'Pro' : 'Starter'}
+    <span className={user.plan === 'starter' ? 'badge badge-starter' : 'badge badge-pro'}>
+      {label}
       {user.cancel_at_period_end ? ' · cancelling' : ''}
     </span>
   )
 }
 
+// The Unlimited plan is stored as a quota no one can reach (see copalat_plan_limit).
+const UNLIMITED_QUOTA = 1000000
+
 // Proposals used out of the trial (free users) or this billing period (paid users).
 export function Quota({ user }: { user: Pick<AdminUser, 'is_paid' | 'quota_used' | 'quota_limit'> }) {
+  if (user.quota_limit >= UNLIMITED_QUOTA) {
+    return (
+      <span className="quota-text" title={`${user.quota_used} proposals written this billing period, no cap`}>
+        {user.quota_used} · no cap
+      </span>
+    )
+  }
   const limit = Math.max(user.quota_limit, 1)
   const used = Math.min(user.quota_used, limit)
   const full = used >= limit
