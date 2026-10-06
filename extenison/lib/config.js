@@ -25,8 +25,8 @@ export const UI_CONFIG = {
     { id: 'concise', label: 'Concise' },
   ],
   lengths: [
-    { id: 'short', label: 'Short', hint: 'about 120 words' },
-    { id: 'medium', label: 'Medium', hint: 'about 200 words' },
-    { id: 'detailed', label: 'Detailed', hint: 'about 300 words' },
+    { id: 'short', label: 'Short', hint: 'about 90 words' },
+    { id: 'medium', label: 'Medium', hint: 'about 150 words' },
+    { id: 'detailed', label: 'Detailed', hint: 'about 230 words' },
   ],
 }
